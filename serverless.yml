@@ -5,6 +5,9 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+  resourceNames:
+    tables:
+      sessions: ${self:service}-${self:provider.stage}-sessions
 
 # Add the serverless-webpack plugin
 plugins:
@@ -21,10 +24,34 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     TELEGRAM_TOKEN: ${ssm:/bbe-telegram-token~true}
     TELEGRAM_ADMIN_ID: ${ssm:/bbe-telegram-adminId~true}
+    DYNAMODB_TABLE_SESSIONS: ${self:custom.resourceNames.tables.sessions}
 
 functions:
   versionCheck:
     handler: src/handlers/utils.versionCheck
     events:
       - schedule:
-          rate: cron(0 12 * * *)
+          rate: cron(0 12 * * ? *)
+
+  setWebhook:
+    handler: src/handlers/bot.setWebhook
+    events:
+      - http:
+          method: get
+          path: setWebhook
+
+resources: # CloudFormation template syntax from here on.
+  Resources:
+    sessions:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.resourceNames.tables.sessions}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
