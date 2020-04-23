@@ -1,8 +1,5 @@
 service:
   name: bbe-bot-sls
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
 
 custom:
   webpack:
@@ -16,15 +13,18 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'eu-west-1'}
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    TELEGRAM_TOKEN: ${ssm:/bbe-telegram-token~true}
+    TELEGRAM_ADMIN_ID: ${ssm:/bbe-telegram-adminId~true}
 
 functions:
-  hello:
-    handler: handler.hello
+  versionCheck:
+    handler: src/handlers/utils.versionCheck
     events:
-      - http:
-          method: get
-          path: hello
+      - schedule:
+          rate: cron(0 12 * * *)
