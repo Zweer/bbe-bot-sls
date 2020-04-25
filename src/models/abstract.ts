@@ -1,5 +1,5 @@
 import * as DynamoDB from 'aws-sdk/clients/dynamodb';
-import { DataMapper } from '@aws/dynamodb-data-mapper';
+import { DataMapper, PutOptions } from '@aws/dynamodb-data-mapper';
 import {
   GetParameters,
   ParallelScanWorkerParameters,
@@ -17,5 +17,9 @@ export class AbstractModel {
 
   static scan<T>(parameters: ScanParameters<T> | ParallelScanWorkerParameters<T>): ScanIterator<T> {
     return mapper.scan<T>(parameters);
+  }
+
+  async put<T>(options?: PutOptions) {
+    return mapper.put<T>(this as any, options);
   }
 }
