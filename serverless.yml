@@ -51,6 +51,9 @@ functions:
       - schedule:
           rate: cron(0 12 * * ? *)
 
+  refreshLogin:
+    handler: src/handlers/bbe.refreshLogin
+
 resources: # CloudFormation template syntax from here on.
   Resources:
     sessions:

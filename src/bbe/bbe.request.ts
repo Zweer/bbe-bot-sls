@@ -8,16 +8,21 @@ import { ConfigEnvironmentResponseDto } from './dto/config/config.environment.re
 import { ConfigGameResponseDto } from './dto/config/config.game.response.dto';
 import { ConfigWeb } from './dto/config/config.web';
 import { ResponseDto } from './dto/response.dto';
-import {ConfigGameRequestDto} from "./dto/config/config.game.request.dto";
+import { ConfigGameRequestDto } from './dto/config/config.game.request.dto';
+import { LoginResponseDto } from './dto/login.response.dto';
+import { LoginRequestDto } from './dto/login.request.dto';
 
 export class BbeRequest {
   private config: BbeConfig;
 
+  private readonly region: string;
   private readonly userId: string;
   private readonly userSessionId: string;
 
   constructor(region: string, userId: string = '0', userSessionId: string = '0') {
     this.config = new BbeConfig(region);
+
+    this.region = region;
     this.userId = userId;
     this.userSessionId = userSessionId;
   }
@@ -71,6 +76,19 @@ export class BbeRequest {
       swf_character_hash: config.versionSwfCharacter,
       swf_ui_hash: config.versionSwfUi,
       swf_movie_cover_hash: config.versionSwfMovieCover,
+    });
+  }
+
+  async loginUser(email: string, password: string): Promise<LoginResponseDto> {
+    return this.send<LoginResponseDto, LoginRequestDto>('loginUser', {
+      email,
+      password,
+      platform: '',
+      platform_user_id: '',
+      client_id: `${this.region}${Math.floor(new Date().getTime() / 1000)}`,
+      app_version: BbeConfig.CURRENT_VERSION,
+      device_info: '{"language":"en","pixelAspectRatio":1,"screenDPI":72,"screenResolutionX":1920,"screenResolutionY":1080,"touchscreenType":0,"os":"HTML5","version":"WEB 8,9,5,0"}',
+      device_id: 'web',
     });
   }
 
