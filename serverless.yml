@@ -8,6 +8,7 @@ custom:
   resourceNames:
     tables:
       sessions: ${self:service}-${self:provider.stage}-sessions
+      telegrafSessions: ${self:service}-${self:provider.stage}-telegrafSessions
 
 # Add the serverless-webpack plugin
 plugins:
@@ -25,6 +26,7 @@ provider:
     TELEGRAM_TOKEN: ${ssm:/bbe-telegram-token~true}
     TELEGRAM_ADMIN_ID: ${ssm:/bbe-telegram-adminId~true}
     DYNAMODB_TABLE_SESSIONS: ${self:custom.resourceNames.tables.sessions}
+    DYNAMODB_TABLE_TELEGRAF_SESSIONS: ${self:custom.resourceNames.tables.telegrafSessions}
 
 functions:
   versionCheck:
@@ -40,6 +42,12 @@ functions:
           method: get
           path: setWebhook
 
+  retrieveConfig:
+    handler: src/handlers/bbe.retrieveConfig
+    events:
+      - schedule:
+          rate: cron(0 12 * * ? *)
+
 resources: # CloudFormation template syntax from here on.
   Resources:
     sessions:
@@ -51,6 +59,19 @@ resources: # CloudFormation template syntax from here on.
             AttributeType: S
         KeySchema:
           - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    telegrafSessionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.resourceNames.tables.telegrafSessions}
+        AttributeDefinitions:
+          - AttributeName: SessionKey
+            AttributeType: S
+        KeySchema:
+          - AttributeName: SessionKey
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

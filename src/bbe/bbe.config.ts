@@ -32,7 +32,7 @@ export class BbeConfig {
     return this.GET_CDN_URL('bbe');
   }
 
-  private get baseUrl(): string {
+   get baseUrl(): string {
     return BbeConfig.BASE_URL.replace('{SERVER}', this.region);
   }
 

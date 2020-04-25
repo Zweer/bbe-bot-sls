@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import { APIGatewayProxyHandler } from 'aws-lambda';
 
 import { bot } from '../telegram';
